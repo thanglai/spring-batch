@@ -25,17 +25,17 @@ public class ItemFieldSetMapper implements FieldSetMapper<Item> {
 
     @Override
     public Item mapFieldSet(FieldSet fieldSet) throws BindException {
-        Item item = new Item();
-        item.setName(fieldSet.readString("name"));
-        item.setOwner(fieldSet.readString("owner"));
-        item.setCount(fieldSet.readString("count"));
-        item.setVal1(fieldSet.readString("val1"));
-        item.setVal2(fieldSet.readString("val2"));
-        item.setVal3(fieldSet.readString("val3"));
-        item.setLocation(fieldSet.readString("location"));
-        item.setType(fieldSet.readString("type"));
-        item.setVal4(fieldSet.readString("val4"));
-        return item;
+        return Item.builder()
+            .name(fieldSet.readString("name"))
+            .owner(fieldSet.readString("owner"))
+            .count(fieldSet.readString("count"))
+            .val1(fieldSet.readString("val1"))
+            .val2(fieldSet.readString("val2"))
+            .val3(fieldSet.readString("val3"))
+            .location(fieldSet.readString("location"))
+            .type(fieldSet.readString("type"))
+            .val4(fieldSet.readString("val4"))
+            .build();
     }
 
 }

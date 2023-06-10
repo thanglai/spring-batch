@@ -15,18 +15,16 @@
 */
 package com.apirus.springbatch.model;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 @Getter
-@Setter
+@Builder
 @ToString
 public class Item {
     private String name;
-
     private String owner;
-
     private String count;
     private String val1;
     private String val2;

@@ -13,7 +13,7 @@ import org.springframework.batch.test.MetaDataInstanceFactory;
 
 import com.apirus.springbatch.model.Item;
 
-public class CsvProcessConfigurationTest {
+class CsvProcessConfigurationTest {
     CsvProcessConfiguration csvProcessConfiguration = new CsvProcessConfiguration();
 
     @Test
