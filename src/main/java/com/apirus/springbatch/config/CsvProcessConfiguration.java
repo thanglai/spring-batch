@@ -51,7 +51,7 @@ import com.apirus.springbatch.writer.CsvItemWriter;
 import lombok.extern.slf4j.XSlf4j;
 
 @Configuration
-@ConditionalOnProperty(value = {"async","partition"}, havingValue = "false", matchIfMissing = true)
+@ConditionalOnProperty(value = {"async","partition", "simple"}, havingValue = "false", matchIfMissing = true)
 @XSlf4j
 public class CsvProcessConfiguration {
   private static final String[] TOKENS = { "name", "owner", "count", "val1", "val2", "val3", "location", "type",

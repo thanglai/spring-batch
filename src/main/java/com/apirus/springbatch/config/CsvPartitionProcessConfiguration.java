@@ -15,10 +15,6 @@
 */
 package com.apirus.springbatch.config;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -32,13 +28,11 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.partition.PartitionHandler;
 import org.springframework.batch.core.partition.support.Partitioner;
-import org.springframework.batch.core.partition.support.SimplePartitioner;
 import org.springframework.batch.core.partition.support.TaskExecutorPartitionHandler;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
@@ -56,7 +50,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -152,24 +145,24 @@ public class CsvPartitionProcessConfiguration {
     log.info("Partitioning file {}", input);
     return gridSize -> {
       var lines = countLines(input);
-      var range = (int)(lines / gridSize);
+      var range = lines / gridSize;
       var remains = lines % gridSize;
-      int fromLine = 0;
-      int toLine = range;
-      var result = new HashMap<String, ExecutionContext>();
-      for (int i = 1; i <= gridSize; i++) {
-        if (i == gridSize) {
-          toLine += remains;
-        }
-        ExecutionContext value = new ExecutionContext();
-        value.putInt("fromLine", fromLine);
-        value.putInt("toLine", toLine);
-        fromLine = toLine;
-        toLine += range;
-        result.put("partition" + i, value);
-      }
-      return result;
+      return IntStream.rangeClosed(1, gridSize)
+        .parallel()
+        .mapToObj(i -> calculateBuckets(i, lines, range, remains))
+        .collect(HashMap::new, (m, e) -> m.put("partition"+e.getInt("index"), e), (m,n) -> m.putAll(n));
     };
+  }
+
+  ExecutionContext calculateBuckets(int index, long total, long range, long remains) {
+    var i = index - 1;
+    log.info("Calculating index {}, total {}, range {}, remains {}", i, total, range, remains);
+    var start = range * i;
+    var end = start + range;
+    if (total - end  == remains) {
+      end += remains;
+    }
+    return new ExecutionContext(Map.of("index",index, "fromLine", start, "toLine", end));
   }
 
   @Bean
